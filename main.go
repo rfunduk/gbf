@@ -159,9 +159,9 @@ func translate(source []byte) []BfOp {
 		// see if they match, then remove them and replace with
 		// a custom internal command 'z' which does this
 		totalOps := len(ops)
-		if ops[totalOps-3].Command == '[' &&
+		if ops[totalOps-1].Command == ']' &&
 			ops[totalOps-2].Command == '-' &&
-			ops[totalOps-1].Command == ']' {
+			ops[totalOps-3].Command == '[' {
 			// remove existing '[-]'
 			ops = ops[:totalOps-3]
 			opIndex -= 3
