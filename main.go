@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-const COMMANDS = "+-<>[].,"
-const REPEATABLE_COMMANDS = "+-<>."
+const Commands = "+-<>[].,"
+const RepeatableCommands = "+-<>."
 
 type BfOp struct {
 	Index       uint32
@@ -27,7 +27,7 @@ func (op BfOp) String() string {
 }
 
 func usage() {
-	fmt.Println("Usage: gbf input.bf")
+	fmt.Println("Usage: gbf <input.bf>")
 }
 
 func main() {
@@ -48,10 +48,10 @@ func main() {
 	// fmt.Printf("Preprocessed Source: %s\n", string(source))
 
 	ops := translate(source)
-	fmt.Printf("Intermediate Representation:\n")
-	for _, op := range ops {
-		fmt.Printf("\t%s\n", op)
-	}
+	// fmt.Printf("Intermediate Representation:\n")
+	// for _, op := range ops {
+	// 	fmt.Printf("\t%s\n", op)
+	//}
 
 	// Run the program
 	fmt.Printf("\nOutput:\n")
@@ -60,8 +60,8 @@ func main() {
 }
 
 func execute(ops []BfOp) {
-	const MAX_MEM uint16 = 3000
-	var mem [MAX_MEM]uint8
+	const MaxMem uint16 = 3000
+	var mem [MaxMem]uint8
 
 	var ip uint16 = 0 // instruction pointer -- where we are in the program
 	var ptr int32 = 0 // memory pointer -- where the cursor is in memory
@@ -76,15 +76,15 @@ func execute(ops []BfOp) {
 		case '-':
 			mem[ptr] -= op.RepeatCount
 		case '>':
-			ptr = (ptr + int32(op.RepeatCount)) % int32(MAX_MEM)
+			ptr = (ptr + int32(op.RepeatCount)) % int32(MaxMem)
 		case '<':
 			// you cant use mod to wrap with negative numbers, thanks obama
-			ptr = (ptr - int32(op.RepeatCount) + int32(MAX_MEM)) % int32(MAX_MEM)
+			ptr = (ptr - int32(op.RepeatCount) + int32(MaxMem)) % int32(MaxMem)
 		case '.':
 			fmt.Printf(string(bytes.Repeat([]byte{mem[ptr]}, int(op.RepeatCount))))
 		case ',':
-			var b []byte = make([]byte, 1)
-			os.Stdin.Read(b)
+			var b = make([]byte, 1)
+			_, _ = os.Stdin.Read(b)
 			mem[ptr] = b[0]
 		case '[':
 			if mem[ptr] == 0 {
@@ -108,10 +108,10 @@ func execute(ops []BfOp) {
 // convert source code from a list of command characters
 // to an array of operations with extra metadata
 func translate(source []byte) []BfOp {
-	repeatableBytes := []byte(REPEATABLE_COMMANDS)
+	repeatableBytes := []byte(RepeatableCommands)
 	var sourceLength = uint32(len(source))
-	var ops = []BfOp{}
-	jumpsStack := []uint32{}
+	var ops []BfOp
+	var jumpsStack []uint32
 	var opIndex uint32 = 0
 
 	for i := uint32(0); i < sourceLength; i++ {
@@ -186,8 +186,8 @@ func translate(source []byte) []BfOp {
 
 // remove comments and other non-command characters
 func preprocess(source []byte) []byte {
-	commandBytes := []byte(COMMANDS)
-	var commands = []byte{}
+	commandBytes := []byte(Commands)
+	var commands []byte
 
 	for _, char := range source {
 		if bytes.Contains(commandBytes, []byte{char}) {
